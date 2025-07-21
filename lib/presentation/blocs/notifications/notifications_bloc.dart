@@ -12,7 +12,6 @@ part 'notifications_state.dart';
 
 Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
-  print('Handling a background message: ${message.messageId}');
 }
 
 class NotificationsBloc extends Bloc<NotificationsEvent, NotificationsState> {
@@ -20,6 +19,7 @@ class NotificationsBloc extends Bloc<NotificationsEvent, NotificationsState> {
 
   NotificationsBloc() : super(const NotificationsState()) {
     on<NotificationStatusChanged>(_notificationStatusChanged);
+    on<NotificationReceived>(_onPushMessageReceived);
     _initialStatusCheck();
     _onForegroundMessage();
   }
@@ -68,7 +68,19 @@ class NotificationsBloc extends Bloc<NotificationsEvent, NotificationsState> {
           ? message.notification?.android?.imageUrl
           : message.notification?.apple?.imageUrl,
     );
+
+    add(NotificationReceived(pushMessage));
   }
+
+  void _onPushMessageReceived(
+    NotificationReceived event,
+    Emitter<NotificationsState> emit) {
+      emit(
+        state.copyWith(
+          notifications: [event.message, ...state.notifications],
+        )
+      );
+    }
 
   void _onForegroundMessage() {
     FirebaseMessaging.onMessage.listen(_handleRemoteNotification);
