@@ -70,6 +70,12 @@ class NotificationsBloc extends Bloc<NotificationsEvent, NotificationsState> {
           : message.notification?.apple?.imageUrl,
     );
 
+    LocalNotifications.showLocalNotification(
+      id: 1, 
+      title: message.notification?.title, 
+      body: message.notification?.body, 
+      data: message.data.toString()
+    );
     add(NotificationReceived(pushMessage));
   }
 
